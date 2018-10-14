@@ -27,9 +27,11 @@ const char* host = "api.thingspeak.com";
 String apiKey = "7F6HDYFBZKP7NDB5";
 
 
+WiFiClient client;
+
 void setup() {
         // put your setup code here, to run once:
-        Serial.begin(9600);
+        Serial.begin(115200);
         
 
         //WiFiManager
@@ -57,7 +59,7 @@ void setup() {
 
 void loop() {
         // put your main code here, to run repeatedly:
-       
+        Serial.println("hi");
         receiveDatateensy();
   
 }
@@ -66,7 +68,7 @@ void loop() {
 
 void establishTCP(){
 
-        WiFiClient client;
+       
 
         const int httpPort = 80;
         if (!client.connect(host, httpPort)) {
@@ -111,13 +113,17 @@ void establishTCP(){
 
 void receiveDatateensy(){
         recvWithStartEndMarkers();
-        if (newData == true) {
+        if (newData == false) {
                 strcpy(tempChars, receivedChars);
                 // this temporary copy is necessary to protect the original data
                 //   because strtok() used in parseData() replaces the commas with \0
                 parseData();
+                
+                Serial.println("1");
                 establishTCP();
+                Serial.println("2");
                 sendbacktoTeensy();
+                Serial.println("3");
                 newData = false;
         }
         

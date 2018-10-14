@@ -75,9 +75,9 @@ uint16_t vocConavg;
 
 //pressure 
 
-uint16_t pressure = 0;
-uint32_t pressureSum = 0;
-uint16_t pressureAvg = 0;
+float pressure = 0;
+float pressureSum = 0;
+float pressureAvg = 0;
 
 //height commented out for now
 
@@ -92,7 +92,7 @@ int AQI = 0;
 
 // Previous Avg Data for TCP sending
 
-uint16_t prevPressureavg = 0;
+float prevPressureavg = 0;
 uint16_t prevVocconavg = 0;
 uint16_t prevCo2conavg = 0;
 float prevTempcavg = 0;
@@ -262,7 +262,6 @@ void loop() {
     logDatasd();
     logDatalcd();
     flushData();
-    sendDatawifi();
     reset();
     calculateAQI();
   }
@@ -321,7 +320,7 @@ void getTHCV() {
     //height = myBME280.readFloatAltitudeMeters();
     humidity = myBME280.readFloatHumidity();
 
-    //Serial.println(pressure);
+    Serial.println(pressure);
 
     //This sends the temperature data to the CCS811
     myCCS811.setEnvironmentalData(humidity, tempC);
@@ -355,7 +354,7 @@ void calculateAvg() {
   tempCAvg = tempCSum / sampleSize;
   humidityAvg = humiditySum / sampleSize;
   vocConavg = vocConsum / sampleSize;
-  pressureAvg = ((float) pressureSum * 0.01) / (float)sampleSize;
+  pressureAvg = ( pressureSum * 0.01) / sampleSize;
 
 }
 
@@ -566,66 +565,5 @@ void printSensorError() {
 
 
 
-void sendDatawifi() {
-
-  bool dataget = false;
-  static boolean recvInprogress = false;
-
-  while (dataget == false) {
-
-
-    Serial.println("Start sending data to ESP8266");
-    wifiSerial.print("(");  //ASCII 126 is first character sent to ESP8266
-    wifiSerial.print(prevPm01avg);
-    wifiSerial.print("/");
-    wifiSerial.print(" ");
-    wifiSerial.print(prevPm25avg);
-    wifiSerial.print("/");
-    wifiSerial.print(" ");
-    wifiSerial.print(prevPm10avg);
-    wifiSerial.print("/");
-    wifiSerial.print(" ");
-    wifiSerial.print(prevCo2conavg);
-    wifiSerial.print("/");
-    wifiSerial.print(" ");
-    wifiSerial.print(prevVocconavg);
-    wifiSerial.print("/");
-    wifiSerial.print(" ");
-    wifiSerial.print(prevTempcavg);
-    wifiSerial.print("/");
-    wifiSerial.print(" ");
-    wifiSerial.print(prevHumidityavg);
-    wifiSerial.print("/");
-    wifiSerial.print(" ");
-    wifiSerial.print(prevPressureavg);
-    wifiSerial.print(")");
-
-    delay(100);
-
-    // Arduino serial print only prints out 2 decimal points for floating data t
-
-    //Serial.println(prevPressureavg);
-
-    while (wifiSerial.available()) {
-      char input = wifiSerial.read();
-      Serial.println(input);
-      if (input == '.') {
-        dataget = true;
-        Serial.println("datasend");
-        
-        break;
-
-      }
-
-    }
-
-  }
-
-
-
-
-
-
-}
 
 
